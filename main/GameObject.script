@@ -1,0 +1,47 @@
+require "/main/UIModules" -- OR wherever you store the on_button_message module
+
+local btnHash = 0
+local thisBtnNums = {}
+local click_turret = false
+
+local myFont = {"TinyUnicode", 10} -- list with hash of font name and character size in pixels
+
+function init(self)
+    local font = myFont
+end
+
+function update(self,dt)
+    -- As an example:
+    	
+    if  click_turret == true and once == false then
+        once = true
+        list = {"Upgrade", font[2], font,vmath.vector3(100,300,0), nil}
+	    msg.post("/main/UI", "Make_button", list) -- 1. OR wherever your UI script is with the Make_button() function 2. Command 3. Arguments
+        list = {"On/Off", font[2], font,vmath.vector3(100,200,0), nil}
+	    msg.post("/main/UI", "Make_button", list)
+        list = {"Special", font[2], font,vmath.vector3(100,100,0), nil}
+	    msg.post("/main/UI", "Make_button", list)
+    else if click_turret == false then
+    	once = false
+    end
+end
+
+function on_input(self, action_id, action)
+    if action_id == "lClick" and click_turret == false then -- if Left Click, check to see if turret is already clicked, then...
+--    	if... -- check to see if mouse pointer collides with one of the turrets at this point, then find which one.
+    	    click_turret = true
+	end
+    end
+end
+
+function on_message(self, message_id, message, sender)
+	if on_button_message(message_id,message,btnHash,thisBtnNums) == "made" then
+	elseif on_button_message(message_id,message,btnHash,thisBtnNums) == "press" then
+		click_turret = false -- turret has been unclicked, signifying the button can be made again. Button should dissappear as soon as this is set.
+		if message[1] == thisBtnNums[1] then -- This would correlate to the order of the created buttons. Upgrade is thisBtnNums[1], On/Off is [2], Special is [3]
+			-- increase turret level for last clicked turret
+        elseif message[1] == thisBtnNums[2] then
+           -- .... Etc.
+		end
+	end
+end

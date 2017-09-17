@@ -1,0 +1,60 @@
+local buttons = 0
+local listButtons = {}
+local listBoxes = {}
+local listOwners = {}
+local thisBtn = {}
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("Make_button") then
+		print("ORDERED BUTTON .............................")
+		make_button(sender,message[1],message[2],message[3],message[4],message[5])
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("lClick") then
+		for i=1,buttons,1 do
+			if listBoxes[i] ~= nil and listBoxes[i] ~= Deleted then
+				local size = gui.get_size(listBoxes[i])
+				thisPos = gui.get_position(listBoxes[i])
+				cX = thisPos.x - (size.x / 2)
+				cX_ = thisPos.x + (size.x / 2)
+				cY = thisPos.y - (size.y / 2)
+				cY_ = thisPos.y + (size.y / 2)
+				if action.x >= cX and action.x <= cX_ then
+					if action.y >= cY and action.y <= cY_ then
+						gui.delete_node(listButtons[i])
+						gui.delete_node(listBoxes[i])
+						listButtons[i] = nil
+						listBoxes[i] = nil
+						thisBtn[1] = i
+						msg.post(listOwners[i], "Button_press", thisBtn)
+						print("CLICKED: " .. tostring(listOwners[i]) .. "/Button: " .. i)
+					end
+				end
+			end
+		end
+	end
+end
+
+function make_button(owner,text,chars,font,pos,bound) -- script owner for message passing, Text, (Size of each character in pixels), pos, size of button in vmath.vector3() format.
+	print(tostring(owner) .. " ORDERED BUTTON")
+	buttons = buttons + 1
+	if bound == nil then
+		bound = vmath.vector3(0,0,0)
+		bound.x = chars * (string.len(text) + 10)
+		bound.y = 4 * chars
+	end
+	buttonBox = gui.new_box_node(pos,bound)
+	button = gui.new_text_node(pos,text)
+	set_anchor_gui({buttonBox,button},pos)
+	gui.set_color(buttonBox,vmath.vector4(.7,.7,.7,1))
+	gui.set_color(button,vmath.vector4(1,1,1,1))
+	listBoxes[buttons] = buttonBox
+	listButtons[buttons] = button
+	listOwners[buttons] = owner
+	gui.set_font(button,font)
+	local tab = {buttons}
+	msg.post(owner, "Made_button", tab)
+	print("MADE BUTTON: " .. buttons)
+end
